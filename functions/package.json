@@ -1,0 +1,22 @@
+{
+  "name": "document-processor-functions",
+  "version": "1.0.0",
+  "description": "Azure Functions for document processing",
+  "main": "",
+  "scripts": {
+    "start": "func start",
+    "storage": "azurite --silent --location ../azurite-data",
+    "dev": "npm run storage & npm run start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.17.0",
+    "@azure/storage-queue": "^12.15.0",
+    "parse-multipart-data": "^1.5.0",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.6.0"
+  },
+  "devDependencies": {
+    "azurite": "^3.28.0"
+  }
+}
