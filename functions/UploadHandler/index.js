@@ -34,7 +34,11 @@ module.exports = async function (context, req) {
         }
 
         const contentType = req.headers['content-type'];
+        // takes the file data from the request
+        // turns it into a "buffer," 
+        // which is just a way for Node.js to handle raw binary data
         const bodyBuffer = Buffer.from(req.body);
+        // extract files and data from a multipart/form-data HTTP request
         const boundary = multipart.getBoundary(contentType);
         const parts = multipart.parse(bodyBuffer, boundary);
 
@@ -46,7 +50,7 @@ module.exports = async function (context, req) {
             };
             return;
         }
-
+        // We expect a single file upload
         const file = parts[0];
         const fileName = file.filename;
         const fileData = file.data;
@@ -70,13 +74,18 @@ module.exports = async function (context, req) {
         const docId = `${timestamp}-${sanitizedName}`;
 
         // Connect to Azurite Blob Storage
+        // process.env.STORAGE_CONNECTION_STRING is set in local.settings.json
         const connectionString = process.env.STORAGE_CONNECTION_STRING;
         const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
         
         // Upload to 'uploads' container
         const containerClient = blobServiceClient.getContainerClient('uploads');
+        // Create container if it doesn't exist
+        // The { access: 'blob' } option sets the container's access level so blobs can be read anonymously
         await containerClient.createIfNotExists({ access: 'blob' });
         
+        // creates a client for a blob with the name docId—even if it doesn't exist yet
+        // then uploads the file data to that blob
         const blockBlobClient = containerClient.getBlockBlobClient(docId);
         await blockBlobClient.upload(fileData, fileData.length, {
             blobHTTPHeaders: { blobContentType: file.type || 'application/octet-stream' }
@@ -100,6 +109,8 @@ module.exports = async function (context, req) {
         };
 
         // Send message (Azure Queue expects base64 encoded string)
+        // convert the message object to a JSON string(text representation of JS object)
+        // then to a Buffer, and finally to a base64 string(bianry data)
         await queueClient.sendMessage(Buffer.from(JSON.stringify(message)).toString('base64'));
 
         context.log(`✅ Message sent to queue for: ${docId}`);

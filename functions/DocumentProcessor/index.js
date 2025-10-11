@@ -2,9 +2,11 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 
+// it's triggered by UploadHandler line 114
+
 module.exports = async function (context, myQueueItem) {
     context.log('📄 Document processor triggered');
-    
+
     try {
         // Parse the queue message
         const message = JSON.parse(myQueueItem);
@@ -20,7 +22,10 @@ module.exports = async function (context, myQueueItem) {
         const uploadsContainer = blobServiceClient.getContainerClient('uploads');
         const blobClient = uploadsContainer.getBlobClient(docId);
         
+        // Passing 0 means download from the start (starting byte position)
         const downloadResponse = await blobClient.download(0);
+        // a readable stream, which is how large files are handled in Node.js
+        // convert that stream into a buffer to process the file data
         const fileBuffer = await streamToBuffer(downloadResponse.readableStreamBody);
         
         context.log(`✅ Downloaded file: ${docId} (${fileBuffer.length} bytes)`);
@@ -45,6 +50,7 @@ module.exports = async function (context, myQueueItem) {
         charCount = extractedText.length;
 
         // Extract top keywords (simple frequency analysis)
+        // TODO: Use generative AI for better keyword extraction
         const words = extractedText.toLowerCase()
             .replace(/[^\w\s]/g, '')
             .split(/\s+/)
@@ -103,9 +109,12 @@ module.exports = async function (context, myQueueItem) {
 async function streamToBuffer(readableStream) {
     return new Promise((resolve, reject) => {
         const chunks = [];
+        // As data comes in from the stream ('data' event), it pushes each chunk into the array.
         readableStream.on('data', (data) => {
             chunks.push(data instanceof Buffer ? data : Buffer.from(data));
         });
+        // on 'end' event, it combines all the chunks into a single Buffer using Buffer.concat
+        // and resolves the promise with that Buffer.
         readableStream.on('end', () => {
             resolve(Buffer.concat(chunks));
         });

@@ -16,6 +16,7 @@ module.exports = async function (context, req) {
     }
 
     try {
+        // await fetch(`${this.apiBaseUrl}/ResultsAPI?docId=${docId}`)
         const docId = req.query.docId;
 
         if (!docId) {
