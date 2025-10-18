@@ -8,8 +8,7 @@ module.exports = async function (context, myQueueItem) {
     context.log('📄 Document processor triggered');
 
     try {
-        // Parse the queue message
-        const message = JSON.parse(myQueueItem);
+        const message = myQueueItem;
         const { docId, fileName, fileType } = message;
         
         context.log(`Processing document: ${docId}`);
