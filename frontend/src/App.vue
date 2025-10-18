@@ -13,6 +13,8 @@ export default {
       checkInterval: null,
       apiBaseUrl: "http://localhost:7071/api",
       uploadHistory: [], // Store upload history
+      checkStartTime: null,
+      maxPollingTime: 30000,
     };
   },
   mounted() {
@@ -101,7 +103,7 @@ export default {
     },
 
     startChecking() {
-      // Check immediately
+      this.checkStartTime = Date.now();
       this.checkResults();
 
       // Then check every 2 seconds
@@ -111,6 +113,29 @@ export default {
     },
 
     async checkResults() {
+      const elapsedTime = Date.now() - this.checkStartTime;
+      if (elapsedTime > this.maxPollingTime) {
+        this.uploadStatus = {
+          type: "error",
+          icon: "⏱️",
+          message: "Processing timed out. Please try again later.",
+        };
+
+        // Update history status to error
+        const historyItem = this.uploadHistory.find(
+          (item) => item.docId === this.currentDocId
+        );
+        if (historyItem) {
+          historyItem.status = "error";
+          this.saveHistory();
+        }
+
+        if (this.checkInterval) {
+          clearInterval(this.checkInterval);
+          this.checkInterval = null;
+        }
+        return;
+      }
       if (!this.currentDocId) return;
 
       try {
