@@ -15,6 +15,7 @@ export default {
       uploadHistory: [], // Store upload history
       checkStartTime: null,
       maxPollingTime: 30000,
+      searchQuery: "",
     };
   },
   mounted() {
@@ -24,6 +25,17 @@ export default {
     if (savedHistory) {
       this.uploadHistory = JSON.parse(savedHistory);
     }
+  },
+  computed: {
+    filteredHistory() {
+      if (!this.searchQuery.trim()) {
+        return this.uploadHistory;
+      }
+      const query = this.searchQuery.toLowerCase();
+      return this.uploadHistory.filter((item) =>
+        item.fileName.toLowerCase().includes(query)
+      );
+    },
   },
   methods: {
     handleFileSelect(event) {
@@ -305,14 +317,37 @@ export default {
           </button>
         </div>
 
+        <!-- Search Box -->
+        <div v-if="uploadHistory.length > 0" class="search-box">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="🔍 Search by filename..."
+            class="search-input"
+          />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="clear-search-btn"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        </div>
+
         <div v-if="uploadHistory.length === 0" class="empty-history">
           <p>No documents yet</p>
           <p class="hint">Upload your first document to get started!</p>
         </div>
 
+        <div v-else-if="filteredHistory.length === 0" class="empty-history">
+          <p>No results found</p>
+          <p class="hint">Try a different search term</p>
+        </div>
+
         <div v-else class="history-list">
           <div
-            v-for="item in uploadHistory"
+            v-for="item in filteredHistory"
             :key="item.docId"
             :class="['history-item', { active: item.docId === currentDocId }]"
           >
