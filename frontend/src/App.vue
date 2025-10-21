@@ -11,7 +11,7 @@ export default {
       currentDocId: null,
       processingResult: null,
       checkInterval: null,
-      apiBaseUrl: "http://localhost:7071/api",
+      apiBaseUrl: env.VUE_APP_API_BASE_URL,
       uploadHistory: [], // Store upload history
       checkStartTime: null,
       maxPollingTime: 30000,
