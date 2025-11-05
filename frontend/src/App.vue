@@ -11,7 +11,8 @@ export default {
       currentDocId: null,
       processingResult: null,
       checkInterval: null,
-      apiBaseUrl: env.VUE_APP_API_BASE_URL,
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+      subscriptionKey: import.meta.env.VITE_APIM_SUBCRIPTION_KEY,
       uploadHistory: [], // Store upload history
       checkStartTime: null,
       maxPollingTime: 30000,
@@ -70,10 +71,28 @@ export default {
         const formData = new FormData();
         formData.append("file", this.selectedFile);
 
+        console.log("=== REQUEST DEBUG ===");
+        console.log("API URL:", `${this.apiBaseUrl}/UploadHandler`);
+        console.log(
+          "Subscription Key:",
+          this.subscriptionKey
+            ? "Present (length: " + this.subscriptionKey.length + ")"
+            : "MISSING"
+        );
+        console.log("File:", this.selectedFile);
+
         const response = await fetch(`${this.apiBaseUrl}/UploadHandler`, {
           method: "POST",
+          headers: {
+            "Ocp-Apim-Subscription-Key": this.subscriptionKey,
+          },
           body: formData,
         });
+
+        console.log("=== RESPONSE DEBUG ===");
+        console.log("Status:", response.status);
+        console.log("Status Text:", response.statusText);
+        console.log("Content-Type:", response.headers.get("content-type"));
 
         const data = await response.json();
 
@@ -152,7 +171,13 @@ export default {
 
       try {
         const response = await fetch(
-          `${this.apiBaseUrl}/ResultsAPI?docId=${this.currentDocId}`
+          `${this.apiBaseUrl}/ResultsAPI?docId=${this.currentDocId}`,
+          {
+            method: "GET",
+            headers: {
+              "Ocp-Apim-Subscription-Key": this.subscriptionKey,
+            },
+          }
         );
         const data = await response.json();
 
@@ -201,7 +226,13 @@ export default {
     async viewResults(docId) {
       try {
         const response = await fetch(
-          `${this.apiBaseUrl}/ResultsAPI?docId=${docId}`
+          `${this.apiBaseUrl}/ResultsAPI?docId=${docId}`,
+          {
+            method: "GET",
+            headers: {
+              "Ocp-Apim-Subscription-Key": this.subscriptionKey,
+            },
+          }
         );
         const data = await response.json();
 
