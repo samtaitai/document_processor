@@ -45,7 +45,7 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
         env:
-          apiBaseUrl: ${{ secrets.VITEVITE_API_BASE_URL }}
+          apiBaseUrl: ${{ secrets.VITE_API_BASE_URL }}
           subscriptionKey: ${{ secrets.VITE_APIM_SUBSCRIPTION_KEY }}
           ###### End of Repository/Build Configurations ######
 
