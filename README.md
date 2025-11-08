@@ -51,72 +51,38 @@ Transform any document (PDF, Word, Text) into actionable insights with just one 
 Built with modern serverless architecture for scalability and reliability:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  Vue.js Frontend                                        │
-│  • Modern, reactive UI                                  │
-│  • Real-time status updates                             │
-│  • Local storage integration                            │
-│                                                         │
-└────────────────┬────────────────────────────────────────┘
-                 │
-                 │ REST API (HTTP/JSON)
-                 │
-┌────────────────▼────────────────────────────────────────┐
-│                                                         │
-│  Azure Functions (Serverless Backend)                   │
-│  ├─ Upload Handler        (HTTP Trigger)                │
-│  ├─ Document Processor    (Queue Trigger)               │
-│  ├─ Results API          (HTTP Trigger)                 │
-│  └─ List Documents       (HTTP Trigger)                 │
-│                                                         │
-└────────────────┬────────────────────────────────────────┘
-                 │
-                 │ Async Message Queue
-                 │
-┌────────────────▼────────────────────────────────────────┐
-│                                                         │
-│  Azure Storage                                          │
-│  ├─ Blob Storage         (File storage)                 │
-│  ├─ Queue Storage        (Message queue)                │
-│  └─ Processed Results    (JSON data)                    │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+Browser ─► Azure Static Web Apps (frontend)
+└─► /doc-processing ─► Azure API Management (gateway) ─► Backend services (Azure Functions, storage etc.)
 ```
 
 ### Why This Architecture?
 
-- **Serverless** - Scales automatically, pay only for what you use
-- **Async Processing** - Non-blocking operations for better performance
-- **Microservices** - Each function has a single responsibility
-- **Cloud-Native** - Built for Azure, but portable to other clouds
-- **Event-Driven** - Reactive system responds to user actions instantly
+- **Frontend** is globally distributed via Azure Static Web Apps — fast content delivery.  
+- **API gateway** (Azure API Management) sits behind the `/doc-processing` route of the static app, providing unified routing, security, versioning and scale.  
+- **Backend services** handle heavy lifting (document extraction, storage, queue processing, etc.), keeping frontend code simple and focused.  
+- Seamless routing: the static web app automatically proxies `/api` calls to the linked backend (via API Management). No extra CORS hassles. 
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend
-- **Vue.js 3** - Progressive JavaScript framework
-- **Vite** - Next-generation frontend tooling
-- **Native JavaScript** - No heavy dependencies
-- **CSS3** - Modern, responsive styling
+### Frontend  
+- Vue 3 — component-based UI framework  
+- Vite — fast modern build tool  
+- Azure Static Web Apps — hosting & global distribution  
 
-### Backend
-- **Azure Functions** - Serverless compute platform
-- **Node.js 20** - JavaScript runtime
-- **Azure Blob Storage** - Scalable object storage
-- **Azure Queue Storage** - Reliable message queue
+### API Gateway  
+- Azure API Management — unified gateway for API calls, securing and managing traffic  
 
-### Processing Libraries
-- **pdf-parse** - PDF text extraction
-- **mammoth** - Word document (.docx) processing
-- **Native parsing** - Text file handling
+### Backend Services  
+- Azure Functions (or other serverless compute) — processing document uploads, queue triggers, result APIs  
+- Azure Storage / Blob Storage — storing uploaded documents and processed results (if applicable)  
+- (Optional) Azure Queue Storage or other messaging for asynchronous processing  
 
-### Development Tools
-- **Azurite** - Local Azure Storage emulator
-- **Azure Functions Core Tools** - Local function testing
-- **npm** - Package management
+### CI / CD  
+- GitHub Actions — automated build & deploy pipeline  
+- `Azure/static-web-apps-deploy@v1` action for frontend + deploy  
+- Environment variables managed via GitHub secrets + build time configuration  
 
 ---
 
