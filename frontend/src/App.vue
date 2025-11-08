@@ -12,7 +12,7 @@ export default {
       processingResult: null,
       checkInterval: null,
       apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-      subscriptionKey: import.meta.env.VITE_APIM_SUBCRIPTION_KEY,
+      subscriptionKey: import.meta.env.VITE_APIM_SUBSCRIPTION_KEY,
       uploadHistory: [], // Store upload history
       checkStartTime: null,
       maxPollingTime: 30000,
