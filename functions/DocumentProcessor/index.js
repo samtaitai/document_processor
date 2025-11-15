@@ -48,28 +48,65 @@ module.exports = async function (context, myQueueItem) {
         wordCount = extractedText.trim().split(/\s+/).filter(w => w.length > 0).length;
         charCount = extractedText.length;
 
-        // Extract top keywords (simple frequency analysis)
-        // TODO: Use generative AI for better keyword extraction
-        const words = extractedText.toLowerCase()
-            .replace(/[^\w\s]/g, '')
-            .split(/\s+/)
-            .filter(w => w.length > 3); // Filter out short words
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const wordFreq = {};
-        words.forEach(word => {
-            wordFreq[word] = (wordFreq[word] || 0) + 1;
-        });
+        // Truncate text if too long (Gemini has token limits)
+        const maxChars = 30000; // ~7500 tokens
+        const textToAnalyze = extractedText.length > maxChars 
+            ? extractedText.substring(0, maxChars) + '...[truncated]'
+            : extractedText;
 
-        const topKeywords = Object.entries(wordFreq)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .map(([word, count]) => ({ word, count }));
+        const prompt = `Analyze this document and provide:
+            1. A concise summary (2-3 sentences)
+            2. Top 10 keywords or key topics
+            3. Main themes or insights
+            4. Document type/category (e.g., business report, academic paper, article, etc.)
+            5. Sentiment/tone (professional, casual, formal, etc.)
 
-        // Create summary (first 500 characters)
-        const summary = extractedText.substring(0, 500).trim() + (extractedText.length > 500 ? '...' : '');
+            Document text:
+            ${textToAnalyze}
 
-        // Prepare result
-        const result = {
+            Respond in JSON format like this:
+            {
+            "summary": "...",
+            "keywords": ["keyword1", "keyword2", ...],
+            "themes": ["theme1", "theme2", ...],
+            "documentType": "...",
+            "tone": "..."
+            }`;
+        
+        context.log('🤖 Calling Gemini API...');
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const aiAnalysisText = response.text();
+        
+        context.log('✅ AI analysis received');
+
+        // Parse AI response
+        let aiAnalysis = {};
+        try {
+            // Extract JSON from response (sometimes AI adds markdown code blocks)
+            const jsonMatch = aiAnalysisText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                aiAnalysis = JSON.parse(jsonMatch[0]);
+            } else {
+                aiAnalysis = JSON.parse(aiAnalysisText);
+            }
+        } catch (parseError) {
+            context.log.warn('⚠️ Could not parse AI response as JSON, using raw text');
+            aiAnalysis = {
+                summary: aiAnalysisText,
+                keywords: [],
+                themes: [],
+                documentType: 'unknown',
+                tone: 'unknown'
+            };
+        }
+
+        // Prepare final result
+        const finalResult = {
             docId,
             fileName,
             fileType,
@@ -77,11 +114,16 @@ module.exports = async function (context, myQueueItem) {
             statistics: {
                 wordCount,
                 charCount,
-                estimatedReadingTime: Math.ceil(wordCount / 200) // 200 words per minute
+                estimatedReadingTime: Math.ceil(wordCount / 200)
             },
-            topKeywords,
-            summary,
-            fullText: extractedText
+            aiAnalysis: {
+                summary: aiAnalysis.summary || '',
+                keywords: aiAnalysis.keywords || [],
+                themes: aiAnalysis.themes || [],
+                documentType: aiAnalysis.documentType || 'unknown',
+                tone: aiAnalysis.tone || 'unknown'
+            },
+            fullText: extractedText // Keep original text
         };
 
         // Save result to 'processed' container
@@ -90,13 +132,14 @@ module.exports = async function (context, myQueueItem) {
         
         const resultBlobClient = processedContainer.getBlockBlobClient(`${docId}.json`);
         await resultBlobClient.upload(
-            JSON.stringify(result, null, 2),
-            Buffer.byteLength(JSON.stringify(result, null, 2)),
+            JSON.stringify(finalResult, null, 2),
+            Buffer.byteLength(JSON.stringify(finalResult, null, 2)),
             { blobHTTPHeaders: { blobContentType: 'application/json' } }
         );
 
         context.log(`✅ Result saved: ${docId}.json`);
         context.log(`📊 Stats: ${wordCount} words, ${charCount} characters`);
+        context.log(`🎯 AI Summary: ${aiAnalysis.summary?.substring(0, 100)}...`);
 
     } catch (error) {
         context.log.error('❌ Error processing document:', error);
