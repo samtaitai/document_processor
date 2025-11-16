@@ -1,9 +1,10 @@
 # 📄 Smart Document Processor
 
-> An intelligent cloud-based document processing system that automatically extracts, analyzes, and provides insights from uploaded documents in real-time.
+> An AI-powered cloud-based document processing system that automatically extracts, analyzes, and provides intelligent insights from uploaded documents using Google Gemini AI.
 
 [![Azure Functions](https://img.shields.io/badge/Azure-Functions-0078D4?style=flat&logo=microsoft-azure)](https://azure.microsoft.com/en-us/services/functions/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=flat&logo=vue.js)](https://vuejs.org/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_AI-4285F4?style=flat&logo=google)](https://ai.google.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?style=flat&logo=node.js)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -11,56 +12,73 @@
 
 ## 🎯 What This Does
 
-Transform any document (PDF, Word, Text) into actionable insights with just one click:
+Transform any document (PDF, Word, Text) into AI-generated insights with just one click:
 
 - **Upload** documents via drag-and-drop or click
-- **Automatic Processing** extracts text and analyzes content
-- **Instant Insights** including word count, reading time, and key topics
-- **Smart Search** finds important keywords automatically
-- **History Tracking** keeps all your processed documents organized
+- **AI Analysis** powered by Google Gemini - understands context and meaning
+- **Intelligent Summaries** - AI generates concise 2-3 sentence overviews
+- **Smart Keyword Extraction** - identifies key topics and themes using AI
+- **Document Classification** - automatically categorizes document type and tone
+- **Theme Analysis** - discovers main ideas and insights
+- **Statistics** - word count, character count, estimated reading time
 
-**Perfect for:** Content analysis, document summarization, research, compliance reviews, and data extraction.
+**Perfect for:** Content analysis, document summarization, research, compliance reviews, sentiment analysis, and intelligent data extraction.
 
 ---
 
 ## ✨ Key Features
 
-### 🚀 **Intelligent Processing**
+### 🤖 **AI-Powered Intelligence**
+- **Gemini AI Integration** - leverages Google's latest generative AI model
+- **Contextual Understanding** - goes beyond word frequency to understand meaning
+- **Intelligent Summarization** - generates human-like summaries
+- **Theme Detection** - identifies main topics and insights
+- **Document Categorization** - classifies by type (business report, novel, article, etc.)
+- **Tone Analysis** - detects professional, casual, formal, technical writing styles
+
+### 🚀 **Robust Processing**
 - Supports PDF, DOCX, DOC, and TXT files
 - Automatic text extraction using industry-standard libraries
-- Real-time processing with progress tracking
-- Extracts metadata: word count, character count, reading time
+- Asynchronous queue-based processing for reliability
+- Real-time progress tracking
 
-### 🔍 **Smart Analysis**
-- **Keyword Extraction** - Identifies the 10 most important terms
-- **Content Summary** - Generates quick overviews
-- **Full Text Access** - Complete extracted content available
-- **Statistical Insights** - Reading time estimation and content metrics
+### 🔍 **Smart Analysis Output**
+- AI-generated summary (context-aware, not just first 500 characters)
+- Intelligent keyword extraction (semantic relevance, not just frequency)
+- Main themes and insights
+- Document type classification
+- Sentiment/tone detection
+- Full text access with statistics
 
 ### 🎨 **Modern User Experience**
 - Clean, intuitive interface
 - Drag-and-drop file upload
 - Real-time status updates
-- Responsive design (works on mobile and desktop)
+- Responsive design (mobile and desktop)
 - Beautiful animations and transitions
 
 ---
 
 ## 🏗️ Architecture
 
-Built with modern serverless architecture for scalability and reliability:
-
+Built with modern serverless architecture and AI integration:
 ```
 Browser ─► Azure Static Web Apps (frontend)
-└─► /doc-processing ─► Azure API Management (gateway) ─► Backend services (Azure Functions, storage etc.)
+           └─► Azure API Management (gateway)
+                └─► Azure Functions (backend)
+                     ├─► Azure Blob Storage (file storage)
+                     ├─► Azure Queue Storage (async processing)
+                     └─► Google Gemini API (AI analysis)
 ```
 
 ### Why This Architecture?
 
-- **Frontend** is globally distributed via Azure Static Web Apps — fast content delivery.  
-- **API gateway** (Azure API Management) sits behind the `/doc-processing` route of the static app, providing unified routing, security, versioning and scale.  
-- **Backend services** handle heavy lifting (document extraction, storage, queue processing, etc.), keeping frontend code simple and focused.  
-- Seamless routing: the static web app automatically proxies `/api` calls to the linked backend (via API Management). No extra CORS hassles. 
+- **Frontend** globally distributed via Azure Static Web Apps for fast delivery
+- **API Management** provides security, rate limiting, and unified routing
+- **Serverless Functions** handle document processing without managing servers
+- **Queue-based Processing** ensures reliability and scalability
+- **AI Integration** adds intelligent analysis without complex infrastructure
+- **Blob Storage** efficiently manages uploaded and processed documents
 
 ---
 
@@ -75,9 +93,15 @@ Browser ─► Azure Static Web Apps (frontend)
 - Azure API Management — unified gateway for API calls, securing and managing traffic  
 
 ### Backend Services  
-- Azure Functions (or other serverless compute) — processing document uploads, queue triggers, result APIs  
-- Azure Storage / Blob Storage — storing uploaded documents and processed results (if applicable)  
-- (Optional) Azure Queue Storage or other messaging for asynchronous processing  
+- Azure Functions - serverless compute (Node.js)
+- Azure Blob Storage - document storage
+- Azure Queue Storage - asynchronous processing
+- Google Gemini API - AI-powered document analysis
+
+### Libraries
+- `pdf-parse` - PDF text extraction
+- `mammoth` - DOCX/DOC processing
+- `@google/genai` - Google Gemini AI SDK 
 
 ### CI / CD  
 - GitHub Actions — automated build & deploy pipeline  
@@ -130,15 +154,11 @@ Open `http://localhost:5173` in your browser!
 
 ## 📈 Potential Enhancements
 
-### Short-term
-- 🌐 Multi-language support (detect document language)
-- 📊 Advanced analytics (sentiment analysis, entity extraction)
-- 🔐 User authentication and private storage
-- 📧 Email notifications when processing completes
+### Planned Features
+- 🔐 **User Authentication** - personal document libraries with Azure AD
+- 📧 **Notifications** - email alerts when processing completes
+- 💾 **Export Options** - download analysis as PDF, JSON, or CSV
 
-### Long-term
-- 🤖 AI-powered summarization using GPT models
-- 📑 Batch processing for multiple files
-- 🔗 API for third-party integrations
-- 📱 Native mobile applications
-- 🌍 Multi-region deployment for global users
+### Advanced Capabilities
+- 🤖 **Custom AI Prompts** - user-defined analysis parameters
+- 📑 **Batch Processing** - analyze multiple files simultaneously
