@@ -482,9 +482,7 @@ export default {
               </div>
               <div class="info-item">
                 <span class="label">Processed At:</span>
-                <span class="value">{{
-                  formatDate(processingResult.processedAt)
-                }}</span>
+                <span class="value">{{ formatDate(processingResult.processedAt) }}</span>
               </div>
             </div>
           </div>
@@ -493,49 +491,65 @@ export default {
             <h3>📈 Statistics</h3>
             <div class="stats-grid">
               <div class="stat-box">
-                <div class="stat-value">
-                  {{ processingResult.statistics.wordCount }}
-                </div>
+                <div class="stat-value">{{ processingResult.statistics.wordCount }}</div>
                 <div class="stat-label">Words</div>
               </div>
               <div class="stat-box">
-                <div class="stat-value">
-                  {{ processingResult.statistics.charCount }}
-                </div>
+                <div class="stat-value">{{ processingResult.statistics.charCount }}</div>
                 <div class="stat-label">Characters</div>
               </div>
               <div class="stat-box">
-                <div class="stat-value">
-                  {{ processingResult.statistics.estimatedReadingTime }} min
-                </div>
+                <div class="stat-value">{{ processingResult.statistics.estimatedReadingTime }} min</div>
                 <div class="stat-label">Reading Time</div>
               </div>
             </div>
           </div>
 
+          <!-- AI Analysis Section -->
           <div class="result-card">
-            <h3>🔑 Top Keywords</h3>
+            <h3>🤖 AI Analysis</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Document Type:</span>
+                <span class="value">{{ processingResult.aiAnalysis.documentType }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Tone:</span>
+                <span class="value">{{ processingResult.aiAnalysis.tone }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <h3>📝 AI Summary</h3>
+            <p class="summary-text">{{ processingResult.aiAnalysis.summary }}</p>
+          </div>
+
+          <div class="result-card">
+            <h3>🔑 Keywords</h3>
             <div class="keywords">
               <span
-                v-for="keyword in processingResult.topKeywords"
-                :key="keyword.word"
+                v-for="(keyword, index) in processingResult.aiAnalysis.keywords"
+                :key="index"
                 class="keyword-tag"
               >
-                {{ keyword.word }} ({{ keyword.count }})
+                {{ keyword }}
               </span>
             </div>
           </div>
 
           <div class="result-card">
-            <h3>📝 Summary</h3>
-            <p class="summary-text">{{ processingResult.summary }}</p>
+            <h3>🎯 Main Themes</h3>
+            <ul class="themes-list">
+              <li v-for="(theme, index) in processingResult.aiAnalysis.themes" :key="index">
+                {{ theme }}
+              </li>
+            </ul>
           </div>
 
           <div class="result-card">
             <h3>📄 Full Text</h3>
-            <div class="full-text">
-              {{ processingResult.fullText }}
-            </div>
+            <div class="full-text">{{ processingResult.fullText }}</div>
           </div>
         </section>
       </main>
