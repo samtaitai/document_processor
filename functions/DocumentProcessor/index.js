@@ -1,7 +1,7 @@
 const { BlobServiceClient } = require('@azure/storage-blob');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-
+const { GoogleGenAI } = require("@google/genai");
 // it's triggered by UploadHandler line 114
 
 module.exports = async function (context, myQueueItem) {
@@ -48,9 +48,8 @@ module.exports = async function (context, myQueueItem) {
         wordCount = extractedText.trim().split(/\s+/).filter(w => w.length > 0).length;
         charCount = extractedText.length;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         // Truncate text if too long (Gemini has token limits)
         const maxChars = 30000; // ~7500 tokens
         const textToAnalyze = extractedText.length > maxChars 
@@ -78,11 +77,13 @@ module.exports = async function (context, myQueueItem) {
         
         context.log('🤖 Calling Gemini API...');
         
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const aiAnalysisText = response.text();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt
+        });
+        const aiAnalysisText = response.text;
         
-        context.log('✅ AI analysis received');
+        context.log('✅ AI analysis received', response);
 
         // Parse AI response
         let aiAnalysis = {};
